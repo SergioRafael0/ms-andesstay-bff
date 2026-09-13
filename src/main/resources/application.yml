@@ -1,0 +1,33 @@
+server:
+  port: 8080
+  error:
+    include-message: always
+
+spring:
+  application:
+    name: ms-andesstay-bff
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${ENTRA_ISSUER_URI:https://login.microsoftonline.com/TU_TENANT_ID/v2.0}
+          jwk-set-uri: ${ENTRA_JWK_SET_URI:https://login.microsoftonline.com/TU_TENANT_ID/discovery/v2.0/keys}
+
+andesstay:
+  microservices:
+    reservations-url: ${MS_RESERVATIONS_URL:http://localhost:8081/api/reservations}
+    catalog-url: ${MS_CATALOG_URL:http://localhost:8082/api/catalog}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    cl.andesstay: DEBUG

@@ -1,0 +1,24 @@
+# Build
+target/
+*.class
+*.jar
+!target/ms-andesstay-bff.jar
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.project
+.classpath
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Env
+.env
