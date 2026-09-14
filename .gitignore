@@ -2,7 +2,6 @@
 target/
 *.class
 *.jar
-!target/ms-andesstay-bff.jar
 
 # IDE
 .idea/
