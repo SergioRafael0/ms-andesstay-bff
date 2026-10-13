@@ -17,6 +17,10 @@ andesstay:
   microservices:
     reservations-url: ${MS_RESERVATIONS_URL:http://localhost:8081/api/reservations}
     catalog-url: ${MS_CATALOG_URL:http://localhost:8082/api/catalog}
+  security:
+    audience: ${ENTRA_AUDIENCE:api://andesstay-api}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200}
 
 management:
   endpoints:
@@ -29,5 +33,5 @@ management:
 
 logging:
   level:
-    org.springframework.security: DEBUG
+    org.springframework.security: INFO
     cl.andesstay: DEBUG

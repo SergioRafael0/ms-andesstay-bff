@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.time.Duration;
 import java.util.Enumeration;
 import java.util.Set;
 
@@ -21,7 +22,17 @@ public class ProxyService {
     @Value("${andesstay.microservices.catalog-url}")
     private String catalogUrl;
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    // RestTemplate con timeouts: sin ellos, un microservicio caído deja la
+    // petición colgada indefinidamente.
+    private final RestTemplate restTemplate;
+
+    public ProxyService() {
+        org.springframework.http.client.SimpleClientHttpRequestFactory factory =
+                new org.springframework.http.client.SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout((int) Duration.ofSeconds(5).toMillis());
+        factory.setReadTimeout((int) Duration.ofSeconds(15).toMillis());
+        this.restTemplate = new RestTemplate(factory);
+    }
 
     // Headers que pertenecen a la conexión HTTP en sí, no al contenido.
     // Si se reenvían tal cual, chocan con los que agrega el propio
@@ -72,6 +83,16 @@ public class ProxyService {
             return ResponseEntity.status(e.getStatusCode())
                     .headers(stripHopByHopHeaders(e.getResponseHeaders()))
                     .body(e.getResponseBodyAsString());
+        } catch (org.springframework.web.client.HttpServerErrorException e) {
+            // Error 5xx del microservicio interno: se traduce a 502 para el cliente
+            // en lugar de dejar que la excepción escape como error 500 sin control.
+            return ResponseEntity.status(org.springframework.http.HttpStatus.BAD_GATEWAY)
+                    .body("{\"error\":\"El microservicio interno devolvió un error\",\"detail\":\""
+                            + e.getStatusCode().value() + "\"}");
+        } catch (org.springframework.web.client.ResourceAccessException e) {
+            // Sin conexión / timeout hacia el microservicio interno.
+            return ResponseEntity.status(org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE)
+                    .body("{\"error\":\"Microservicio interno no disponible\"}");
         }
     }
 
