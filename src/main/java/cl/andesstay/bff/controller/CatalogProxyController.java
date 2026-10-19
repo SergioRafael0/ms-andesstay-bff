@@ -18,8 +18,7 @@ public class CatalogProxyController {
 
     @RequestMapping(value = "/**", method = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.PATCH, RequestMethod.DELETE, RequestMethod.OPTIONS})
     public ResponseEntity<String> proxy(
-            HttpServletRequest request,
-            @RequestBody(required = false) String body
+            HttpServletRequest request
     ) {
         String path = extractPath(request);
         HttpMethod method = HttpMethod.valueOf(request.getMethod());

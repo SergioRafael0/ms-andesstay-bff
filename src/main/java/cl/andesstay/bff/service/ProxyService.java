@@ -27,10 +27,9 @@ public class ProxyService {
     private final RestTemplate restTemplate;
 
     public ProxyService() {
-        org.springframework.http.client.SimpleClientHttpRequestFactory factory =
-                new org.springframework.http.client.SimpleClientHttpRequestFactory();
-        factory.setConnectTimeout((int) Duration.ofSeconds(5).toMillis());
-        factory.setReadTimeout((int) Duration.ofSeconds(15).toMillis());
+        org.springframework.http.client.JdkClientHttpRequestFactory factory =
+                new org.springframework.http.client.JdkClientHttpRequestFactory(java.net.http.HttpClient.newBuilder().version(java.net.http.HttpClient.Version.HTTP_1_1).connectTimeout(Duration.ofSeconds(5)).build());
+        factory.setReadTimeout(Duration.ofSeconds(15));
         this.restTemplate = new RestTemplate(factory);
     }
 
@@ -60,7 +59,7 @@ public class ProxyService {
         Enumeration<String> headerNames = request.getHeaderNames();
         while (headerNames.hasMoreElements()) {
             String name = headerNames.nextElement();
-            if (!name.equalsIgnoreCase("host") && !name.equalsIgnoreCase("content-length")) {
+            if (!name.equalsIgnoreCase("host") && !name.equalsIgnoreCase("connection") && !name.equalsIgnoreCase("upgrade") && !name.equalsIgnoreCase("expect") && !name.equalsIgnoreCase("origin") && !name.toLowerCase().startsWith("access-control-request-") && !name.equalsIgnoreCase("content-length")) {
                 headers.add(name, request.getHeader(name));
             }
         }
